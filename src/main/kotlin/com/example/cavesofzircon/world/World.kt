@@ -1,8 +1,10 @@
 package com.example.cavesofzircon.world
 
+import com.example.cavesofzircon.attributes.Vision
 import com.example.cavesofzircon.blocks.GameBlock
 import com.example.cavesofzircon.extensions.AnyGameEntity
 import com.example.cavesofzircon.extensions.GameEntity
+import com.example.cavesofzircon.extensions.blocksVision
 import com.example.cavesofzircon.extensions.position
 import org.hexworks.amethyst.api.Engine
 import org.hexworks.amethyst.api.entity.Entity
@@ -10,11 +12,14 @@ import org.hexworks.amethyst.api.entity.EntityType
 import org.hexworks.amethyst.internal.TurnBasedEngine
 import org.hexworks.cobalt.datatypes.Maybe
 import org.hexworks.zircon.api.builder.game.GameAreaBuilder
+import org.hexworks.zircon.api.data.Position
 import org.hexworks.zircon.api.data.Position3D
 import org.hexworks.zircon.api.data.Size3D
 import org.hexworks.zircon.api.data.Tile
 import org.hexworks.zircon.api.game.GameArea
 import org.hexworks.zircon.api.screen.Screen
+import org.hexworks.zircon.api.shape.EllipseFactory
+import org.hexworks.zircon.api.shape.LineFactory
 import org.hexworks.zircon.api.uievent.UIEvent
 
 class World(
@@ -124,5 +129,38 @@ class World(
             currentTry++
         }
         return position
+    }
+
+    fun isVisionBlockedAt(pos: Position3D): Boolean {
+        return fetchBlockAt(pos).fold(whenEmpty = { false }, whenPresent = {
+            it.entities.any(GameEntity<EntityType>::blocksVision)
+        })
+    }
+
+    fun findVisiblePositionsFor(entity: GameEntity<EntityType>): Iterable<Position> {
+        val centerPos = entity.position.to2DPosition()
+
+        return entity.findAttribute(Vision::class).map { (radius) ->
+            EllipseFactory.buildEllipse(
+                fromPosition = centerPos,
+                toPosition = centerPos.withRelativeX(radius).withRelativeY(radius)
+            )
+                .positions
+                .flatMap { ringPos ->
+                    val result = mutableListOf<Position>()
+                    val iter = LineFactory.buildLine(centerPos, ringPos).iterator()
+                    do {
+                        val next = iter.next()
+                        result.add(next)
+                    } while (iter.hasNext() &&
+                            isVisionBlockedAt(Position3D.from2DPosition(next, entity.position.z)).not()
+                    )
+                    result
+                }
+        }.orElse(listOf())
+    }
+
+    fun addWorldEntity(entity: Entity<EntityType, GameContext>) {
+        engine.addEntity(entity)
     }
 }
