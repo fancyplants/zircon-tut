@@ -53,4 +53,12 @@ object GameTileRepository {
         .withCharacter(' ')
         .withBackgroundColor(GameColors.UNREVEALED_COLOR)
         .buildCharacterTile()
+
+    val BAT = Tile.newBuilder()
+        .withCharacter('b')
+        .withBackgroundColor(GameColors.FLOOR_BACKGROUND)
+        .withBackgroundColor(GameColors.BAT_COLOR)
+        .buildCharacterTile()
+
+
 }

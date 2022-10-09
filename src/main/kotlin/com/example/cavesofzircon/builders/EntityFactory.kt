@@ -21,6 +21,7 @@ object EntityFactory {
     fun newPlayer() = newGameEntityOfType(Player) {
         attributes(
             EntityPosition(),
+            BlockOccupier,
             EntityTile(GameTileRepository.PLAYER),
             EntityActions(Dig::class, Attack::class),
             CombatStats.create(
@@ -31,7 +32,7 @@ object EntityFactory {
             Vision(9)
         )
         behaviors(InputReceiver)
-        facets(Movable, CameraMover, StairClimber, StairDescender)
+        facets(Movable, CameraMover, StairClimber, StairDescender, Attackable, Destructible)
     }
 
     fun newWall() = newGameEntityOfType(Wall) {
@@ -76,5 +77,21 @@ object EntityFactory {
 
     fun newFogOfWar() = newGameEntityOfType(FOW) {
         behaviors(FogOfWar)
+    }
+
+    fun newBat() = newGameEntityOfType(Bat) {
+        attributes(
+            BlockOccupier,
+            EntityPosition(),
+            EntityTile(GameTileRepository.BAT),
+            CombatStats.create(
+                maxHp = 5,
+                attackValue = 2,
+                defenseValue = 1
+            ),
+            EntityActions(Attack::class)
+        )
+        facets(Movable, Attackable, Destructible)
+        behaviors(Wanderer)
     }
 }
