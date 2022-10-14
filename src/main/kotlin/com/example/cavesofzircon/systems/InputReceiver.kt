@@ -6,6 +6,7 @@ import com.example.cavesofzircon.extensions.position
 import com.example.cavesofzircon.messages.MoveDown
 import com.example.cavesofzircon.messages.MoveTo
 import com.example.cavesofzircon.messages.MoveUp
+import com.example.cavesofzircon.messages.PickItemUp
 import com.example.cavesofzircon.world.GameContext
 import org.hexworks.amethyst.api.base.BaseBehavior
 import org.hexworks.amethyst.api.entity.Entity
@@ -30,6 +31,7 @@ object InputReceiver : BaseBehavior<GameContext>() {
                 KeyCode.KEY_D -> player.moveTo(currentPos.withRelativeX(1), context)
                 KeyCode.KEY_R -> player.moveUp(context)
                 KeyCode.KEY_F -> player.moveDown(context)
+                KeyCode.KEY_P -> player.pickItemUp(currentPos, context)
                 else -> {
                     logger.debug("UI Event ($uiEvent) does not have a corresponding command, it is ignored.")
                 }
@@ -48,5 +50,9 @@ object InputReceiver : BaseBehavior<GameContext>() {
 
     private suspend fun GameEntity<Player>.moveDown(context: GameContext) {
         receiveMessage(MoveDown(context, this))
+    }
+
+    private suspend fun GameEntity<Player>.pickItemUp(position: Position3D, context: GameContext) {
+        receiveMessage(PickItemUp(context, this, position))
     }
 }

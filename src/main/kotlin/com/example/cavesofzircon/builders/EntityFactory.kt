@@ -10,6 +10,8 @@ import com.example.cavesofzircon.world.GameContext
 import org.hexworks.amethyst.api.builder.EntityBuilder
 import org.hexworks.amethyst.api.entity.EntityType
 import org.hexworks.amethyst.api.newEntityOfType
+import org.hexworks.zircon.api.GraphicalTilesetResources
+import org.hexworks.zircon.api.data.Tile
 
 fun <T : EntityType> newGameEntityOfType(
     type: T,
@@ -29,10 +31,11 @@ object EntityFactory {
                 attackValue = 10,
                 defenseValue = 5
             ),
-            Vision(9)
+            Vision(9),
+            Inventory(10)
         )
         behaviors(InputReceiver)
-        facets(Movable, CameraMover, StairClimber, StairDescender, Attackable, Destructible)
+        facets(Movable, CameraMover, StairClimber, StairDescender, Attackable, Destructible, ItemPicker)
     }
 
     fun newWall() = newGameEntityOfType(Wall) {
@@ -93,5 +96,18 @@ object EntityFactory {
         )
         facets(Movable, Attackable, Destructible)
         behaviors(Wanderer)
+    }
+
+    fun newZircon() = newGameEntityOfType(Zircon) {
+        attributes(
+            ItemIcon(
+                Tile.newBuilder()
+                    .withName("white gem")
+                    .withTileset(GraphicalTilesetResources.nethack16x16())
+                    .buildGraphicalTile()
+            ),
+            EntityPosition(),
+            EntityTile(GameTileRepository.ZIRCON)
+        )
     }
 }
